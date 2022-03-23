@@ -12,7 +12,7 @@ it can detect your presence and stop moving the mouse until you stop your activi
 
 # Download 
 [DesktopMouseJiggler.zip](https://github.com/nabil86/DesktopMouseJiggler/files/8332997/DesktopMouseJiggler.zip)
-To lauch app:
+To launch app:
 * windows: ./bin/DesktopMouseJiggler.bat
 * Linux : ./bin/DesktopMouseJiggler
 
