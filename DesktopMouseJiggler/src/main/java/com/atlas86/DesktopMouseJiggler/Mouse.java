@@ -59,12 +59,12 @@ public class Mouse implements Runnable{
         if (hasNotMovedByUser(oldPosition)) {
             var position = Position.getRandomPosition();
             System.out.println("Mouse move to " + position);
-            robot.mouseMove(position.getX(), position.getY());
+            robot.mouseMove(position.x(), position.y());
             oldPosition = position;
             Thread.sleep(WAIT);
         } else {
             oldPosition = getCurrentPointerPosition();
-            System.out.println("User has moved mouse wait next iteration");
+            System.out.println("User has moved mouse, wait next iteration");
             Thread.sleep(WAIT * 3);
         }
     }
