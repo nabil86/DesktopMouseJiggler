@@ -1,17 +1,17 @@
 package com.atlas86.DesktopMouseJiggler;
-import java.util.random.RandomGenerator;
-import java.util.random.RandomGeneratorFactory;
+import java.util.concurrent.ThreadLocalRandom;
 /**
- * 
- * @author atlas86
+ * Immutable (x, y) screen position.
  */
 public record Position(int x, int y) {
 
-    private static final RandomGenerator random = RandomGeneratorFactory.getDefault().create();
-
-    public static Position getRandomPosition() {
-        int x = random.nextInt(400);
-        int y = random.nextInt(400);
-        return new Position(x, y);
+    /**
+     * Returns a random position within [0, amplitudePx) on each axis.
+     */
+    public static Position getRandomPosition(int amplitudePx) {
+        var rng = ThreadLocalRandom.current();
+        return new Position(rng.nextInt(amplitudePx), rng.nextInt(amplitudePx));
     }
+
+    
 }

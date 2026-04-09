@@ -3,3 +3,14 @@
 
 # Ignore Gradle build output directory
 build
+*/bin/*
+*/settings/*
+.project
+.classpath
+.settings/
+DesktopMouseJiggler/ AGENT_BRIEF.md
+.github/agents/refacto.md
+.github/agents/refacto.agent.md
+.vscode/settings.json
+DesktopMouseJiggler/src/main/resources/desktopmousejiggler/Gemini_Generated_Image_kpio9hkpio9hkpio.png
+.gitignore

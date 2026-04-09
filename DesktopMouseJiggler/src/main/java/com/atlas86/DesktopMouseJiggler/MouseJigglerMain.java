@@ -6,57 +6,65 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-
+import java.awt.Image;
 /**
- *
- * @author atlas86
+ * Application entry point. Manages the system-tray icon and its popup menu.
  */
 public class MouseJigglerMain {
 
-    private boolean firstTime;
+    private static final Logger LOGGER = Logger.getLogger(MouseJigglerMain.class.getName());
+
     private TrayIcon trayIcon;
-    private boolean enabled = false;
+    private final AtomicReference<AppConfig> configRef =
+            new AtomicReference<>(ConfigPersistence.load());
+    private final Mouse mouse = new Mouse(configRef);
 
     public static void main(String[] args) {
         new MouseJigglerMain().createTrayIcon();
     }
 
-    private java.awt.Image loadImage() {
-        java.awt.Image image = null;
-        try {
-            var in = getClass().getResourceAsStream("/desktopmousejiggler/mouseJiggler2.jpg");
-            image = ImageIO.read(in);
+    private Image loadImage() {
+        try (InputStream in = getClass().getResourceAsStream("/desktopmousejiggler/mouso.png")) {
+            if (in == null) {
+                LOGGER.warning("Tray icon image not found");
+                return null;
+            }
+            return ImageIO.read(in);
         } catch (IOException ex) {
-            System.out.println(ex);
+            LOGGER.log(Level.WARNING, "Failed to load tray icon image", ex);
+            return null;
         }
-
-        return image;
     }
 
     public void createTrayIcon() {
         checkSupportedSysTray();
         var tray = SystemTray.getSystemTray();
         var image = loadImage();
-        var popup = createPopuMenu();
+        var popup = createPopupMenu();
 
         trayIcon = new TrayIcon(image, "Desktop Mouse Jiggler", popup);
-        // add the tray image
+        trayIcon.setImageAutoSize(true);
         try {
             tray.add(trayIcon);
         } catch (AWTException e) {
-            System.err.println(e);
+            LOGGER.log(Level.SEVERE, "Failed to add tray icon", e);
         }
+        Runtime.getRuntime().addShutdownHook(new Thread(mouse::stop, "shutdown-hook"));
     }
 
-    private PopupMenu createPopuMenu() {
-        // create a popup menu
+    private PopupMenu createPopupMenu() {
         var popup = new PopupMenu();
-        var mouse = new Mouse();
 
-        var activeItem = new java.awt.CheckboxMenuItem("Active", enabled);
+        var activeItem = new CheckboxMenuItem("Active", true);
+        mouse.start(); // Started by default
+        
         activeItem.addItemListener((ItemEvent e) -> {
             if (activeItem.getState()) {
                 mouse.start();
@@ -64,30 +72,25 @@ public class MouseJigglerMain {
                 mouse.stop();
             }
         });
-
         popup.add(activeItem);
-        var showItem = new java.awt.MenuItem("Config");
+
+        var showItem = new MenuItem("Config");
+        showItem.addActionListener(e ->
+                new ConfigWindow(configRef, saved -> {}).show());
         popup.add(showItem);
 
-        // create a action listener to listen for default action executed on the tray icon
-        var closeItem = new java.awt.MenuItem("Close");
-        final ActionListener closeListener = (java.awt.event.ActionEvent e) -> System.exit(0);
+        var closeItem = new MenuItem("Close");
+        final ActionListener closeListener = e -> System.exit(0);
         closeItem.addActionListener(closeListener);
         popup.add(closeItem);
+
         return popup;
     }
 
     private void checkSupportedSysTray() {
         if (!SystemTray.isSupported()) {
-            System.err.println("SystemTray not supported ");
+            LOGGER.severe("SystemTray not supported on this platform");
             System.exit(0);
-        }
-    }
-
-    public void showProgramIsMinimizedMsg() {
-        if (firstTime) {
-            trayIcon.displayMessage("Menu desktop mouse jiggler", "Menu", TrayIcon.MessageType.INFO);
-            firstTime = false;
         }
     }
 }
