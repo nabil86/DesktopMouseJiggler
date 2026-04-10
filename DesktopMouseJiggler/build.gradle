@@ -47,3 +47,29 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
+
+// Ensure the generated start scripts and distributions use the fat (shadow) JAR
+tasks.named('startScripts') {
+    dependsOn shadowJar
+}
+
+tasks.named('installDist') {
+    dependsOn shadowJar
+}
+
+tasks.named('distZip') {
+    dependsOn shadowJar
+}
+
+distributions {
+    main {
+        contents {
+            from(tasks.named('shadowJar')) {
+                into 'lib'
+            }
+            from(tasks.named('startScripts')) {
+                into 'bin'
+            }
+        }
+    }
+}
