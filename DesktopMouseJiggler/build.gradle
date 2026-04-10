@@ -67,9 +67,6 @@ distributions {
             from(tasks.named('shadowJar')) {
                 into 'lib'
             }
-            from(tasks.named('startScripts')) {
-                into 'bin'
-            }
         }
     }
 }
